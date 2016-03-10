@@ -30,14 +30,14 @@ public class TestIndexer
        System.out.println("Indexation de la collection");
        
        // connection à la base
-       //BufferedReader config = new BufferedReader (new FileReader(argv[1]));
-       String ConnectURL = "jdbc:postgresql://localhost:5432/postgres";
-       String login="postgres";
-       String pass="postgres";       
-       /*ConnectURL=config.readLine();
+       BufferedReader config = new BufferedReader (new FileReader(argv[1]));
+       String ConnectURL = "";
+       String login="";
+       String pass="";       
+       ConnectURL=config.readLine();
        if (ConnectURL !=null) {login=config.readLine();}
-       if (login !=null) {pass=config.readLine();}*/
-       //config.close();
+       if (login !=null) {pass=config.readLine();}
+       config.close();
        
        BaseWriter maBase = new BaseWriter(ConnectURL, login, pass); 
        System.out.println("Creation de la base");       
