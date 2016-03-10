@@ -27,25 +27,25 @@ public static void main(String argv[])  {
 	int seuil=50;
         
      try  {
-              FileWriter out= new FileWriter(new File(argv[2]));
+              FileWriter out= new FileWriter(new File(argv[1]));
                            
-			String monfichier= new String(argv[0]);
-	         System.out.println(monfichier);
+			//String monfichier= new String(argv[0]);
+	         //System.out.println(monfichier);
 		   
-	         String q= new String (argv[1]);
+	         String q= new String (argv[0]);
              TermQuery query = new TermQuery(q);
 
 		
-             BufferedReader config = new BufferedReader (new FileReader(monfichier));
-			 System.out.println(monfichier);
-			 String ConnectURL;
-			 String login="";
-			 String pass="";
-			 ConnectURL=config.readLine();
+             /*BufferedReader config = new BufferedReader (new FileReader(monfichier));
+			 System.out.println(monfichier);*/
+			 String ConnectURL = "jdbc:postgresql://localhost:5432/postgres";
+		     String login="postgres";
+		     String pass="postgres"; 
+			 //ConnectURL=config.readLine();
 			
-			 if (ConnectURL!=null) {login=config.readLine(); }
+			 /*if (ConnectURL!=null) {login=config.readLine(); }
 			 if (login!=null) {pass=config.readLine();}
-			 config.close();
+			 config.close();*/
 			 
 			 BaseReader base=new BaseReader(ConnectURL,login,pass);
 			 // recherche de tous les documents pertinents de l'index et on calcule le score de pertinence
