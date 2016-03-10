@@ -31,10 +31,8 @@ public static void main(String argv[])  {
                            
 			 String monfichier= new String(argv[0]);
 	         System.out.println(monfichier);
-		   
-	         String q= new String (argv[0]);
-             TermQuery query = new TermQuery(q);
-
+	         String q= "";
+             
 		
              BufferedReader config = new BufferedReader (new FileReader(monfichier));
 			 System.out.println(monfichier);
@@ -45,6 +43,9 @@ public static void main(String argv[])  {
 			
 			 if (ConnectURL!=null) {login=config.readLine(); }
 			 if (login!=null) {pass=config.readLine();}
+			 if(pass!=null){ q=config.readLine();}
+			 
+			 TermQuery query = new TermQuery(q);
 			 config.close();
 			 
 			 BaseReader base=new BaseReader(ConnectURL,login,pass);
