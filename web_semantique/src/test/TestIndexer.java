@@ -41,7 +41,7 @@ public class TestIndexer
        
        BaseWriter maBase = new BaseWriter(ConnectURL, login, pass); 
        System.out.println("Creation de la base");       
-       maBase.create();          
+       BaseWriter.create();          
         		  
        // Parcours des documents avec le parseur Jsoup et construction des structures de stockage
 	   System.out.println("Parcours des documents");
@@ -49,7 +49,7 @@ public class TestIndexer
 	   monIndexWriter.construct();
       
       	// fermeture de la base
-       maBase.close();
+       BaseWriter.close();
        
        System.out.println("That's all !");
 
