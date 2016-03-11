@@ -1,11 +1,6 @@
 package index;
 
 
-import java.sql.Date;
-import java.util.Vector;
-import java.util.Enumeration;
-
-
 /** 
  * Les objets DocumentAIndexer contiennnent les unit�s d'indexation
  *
