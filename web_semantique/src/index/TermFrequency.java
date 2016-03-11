@@ -13,7 +13,7 @@ public final class TermFrequency {
   /** id du document*/
   public int doc_id;
   /** fr�quence dans le document*/
-  public short frequency;
+  public float frequency;
 
 
 /** Defaults Constructor */

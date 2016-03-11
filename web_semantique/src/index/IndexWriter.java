@@ -26,6 +26,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.w3c.dom.Attr;
 
 import utils.FileList;
 import store.BaseWriter;
@@ -130,6 +131,31 @@ for (int i=0; i<STOP_WORDS.length; i++)
 		Document document = Jsoup.parse(fichier, "UTF-8");	
 		//on recupère le texte contenu dans le body et on l'index
 		//Element body = document.body();
+		
+		// Get page title
+		String title = document.title();
+		constructTerme(title);
+		
+		// Get page meta description
+		Elements metasDescription = document.select("meta[name=\"description\"]");
+		for(Element metaDescription : metasDescription){
+			constructTerme(metaDescription.attr("content"));
+		}
+		
+		// Get page meta keywords
+		Elements metasKeyword = document.select("meta[name=\"keywords\"]");
+		for(Element metaKeyword : metasKeyword){
+			String allKeywords = metaKeyword.attr("content").replace(", ", ",");
+			constructTerme(allKeywords);
+		}
+		
+		// Get all h tags
+		Elements hTags = document.select("h1, h2, h3, h4, h5, h6");
+		for(Element hTag : hTags){
+			constructTerme(hTag.text());
+		}
+		
+		// get all paragraphes
 		Elements paragraphes = document.select("p");
 		for(Element p : paragraphes){
 			constructTerme(p.text());
@@ -209,9 +235,10 @@ for (int j=0;j<mots.length; j++) {
 	if (Stoptable.get(mot)==null) {
 		TextObject myTermText = new TextObject(mot);
 		term_count++;
-		 if (postingTable.containsKey(myTermText)) { // si la table de posting contient deja le terme car rencontrer soit dans une autre doc, soit dans le même
+		 if (new_document.containsKey(myTermText)) { // si la table de posting contient deja le terme car rencontrer soit dans une autre doc, soit dans le même
            Term myTerm=(Term) postingTable.get(myTermText); //on récupère les infos qu'on a jusqu'ici
-           postingTable.remove(myTermText);
+           //postingTable.remove(myTermText);
+           new_document.remove(myTermText);
            TreeMap freq = new TreeMap();
            freq = myTerm.frequency; // on recupère les occurences dans les autre documents
            if (freq.containsKey(count_id_doc)) { // si le terme a déjà été trouvé pour le document
@@ -220,7 +247,8 @@ for (int j=0;j<mots.length; j++) {
 		        myTermFrequency.frequency++;
 		       freq.put(count_id_doc, myTermFrequency);
 		       Term myNewTerm = new Term(myTerm.term_id, myTerm.text, freq);
-		       postingTable.put(myTermText, myNewTerm);       
+		       //postingTable.put(myTermText, myNewTerm);
+		       new_document.put(myTermText, myNewTerm);
            }      
              
            else { // si le terme est trouve dans un nouvel docuemnt
@@ -229,7 +257,8 @@ for (int j=0;j<mots.length; j++) {
          	freq.put(count_id_doc, myTermFrequency);
         	                                 
          	Term myNewTerm = new Term(myTerm.term_id, myTerm.text, freq); 
-         	postingTable.put(myTermText, myNewTerm); 
+         	//postingTable.put(myTermText, myNewTerm); 
+         	new_document.put(myTermText, myNewTerm);
          	Boolean myNewBoolean = new Boolean(false);             
                  	
            }
@@ -243,14 +272,28 @@ for (int j=0;j<mots.length; j++) {
             freq.put(count_id_doc, myTermFrequency);
             Term myTerm = new Term(count_id_term, mot, freq);     
             count_id_term++;
-            postingTable.put(myTermText, myTerm);  
+            postingTable.put(myTermText, myTerm); 
+            new_document.put(myTermText, myTerm);
      } //else  
 
 	}	// if
 
 } // for
-
-
+	Enumeration<TextObject> enumeration = new_document.keys();
+	while(enumeration.hasMoreElements()){
+		TextObject key = enumeration.nextElement();
+		Term term = (Term) new_document.get(key);
+		TreeMap frequency = term.frequency;
+		TermFrequency termFrequency = (TermFrequency) frequency.get(count_id_doc);
+		float weight = termFrequency.frequency;
+		float tf = weight/count_id_term;
+		termFrequency.frequency = tf;
+		frequency.remove(count_id_doc);
+		frequency.put(count_id_doc, termFrequency);
+		Term newTerm = new Term(term.term_id, term.text, frequency);
+		postingTable.put(key, newTerm);
+	}
+	//PrintPostingTable();
 }
 
   /** Prints the documentVector */
