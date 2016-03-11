@@ -25,6 +25,7 @@ import org.jsoup.Jsoup;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import utils.FileList;
 import store.BaseWriter;
@@ -128,9 +129,13 @@ for (int i=0; i<STOP_WORDS.length; i++)
 		// parsage du fichier
 		Document document = Jsoup.parse(fichier, "UTF-8");	
 		//on recupère le texte contenu dans le body et on l'index
-		Element body = document.body();
+		//Element body = document.body();
+		Elements paragraphes = document.select("p");
+		for(Element p : paragraphes){
+			constructTerme(p.text());
+		}
 		//System.out.println("corps doc "+body.text());
-	    constructTerme(body.text());
+	    //constructTerme(body.text());
 		}
 		
 	catch (IOException io){
@@ -161,14 +166,6 @@ catch (SQLException sqle2) {
 }  
   
   } // construct() 
-  
-  
-  
-
-
-
-
-
 
 /**
 * Permet de remplir la table de posting avec le texte.
@@ -207,56 +204,47 @@ texte=texte.replace('©',' ');
 String[] mots=texte.split(" ");
 				
 for (int j=0;j<mots.length; j++) {
-
 	String mot=mots[j];		// on pourrair utiliser Porter ou la troncature ...!		
 	// on verifie que le mot n'est pas un mot vide ou un mot qui contient un @ ou un %
 	if (Stoptable.get(mot)==null) {
-			TextObject myTermText = new TextObject(mot);
-			term_count++;
+		TextObject myTermText = new TextObject(mot);
+		term_count++;
 		 if (postingTable.containsKey(myTermText)) { // si la table de posting contient deja le terme car rencontrer soit dans une autre doc, soit dans le même
-
-                           Term myTerm=(Term) postingTable.get(myTermText); //on récupère les infos qu'on a jusqu'ici
-                           postingTable.remove(myTermText);
-                           TreeMap freq = new TreeMap();
-                           freq = myTerm.frequency; // on recupère les occurences dans les autre documents
-     
-                           
-                           if (freq.containsKey(count_id_doc)) { // si le terme a déjà été trouvé pour le document
-    
-                                   TermFrequency myTermFrequency = (TermFrequency) freq.get(count_id_doc);
-                                   freq.remove(count_id_doc);
-                                    myTermFrequency.frequency++;
-                                   freq.put(count_id_doc, myTermFrequency);
-                                   Term myNewTerm = new Term(myTerm.term_id, myTerm.text, freq);
-                                   postingTable.put(myTermText, myNewTerm);       
-                           }      
-                             
-                           else { // si le terme est trouve dans un nouvel docuemnt
-                            		short un =1;
-                                	TermFrequency myTermFrequency = new TermFrequency(count_id_doc,un);   
-                                 	freq.put(count_id_doc, myTermFrequency);
-                                	                                 
-                                 	Term myNewTerm = new Term(myTerm.term_id, myTerm.text, freq); 
-                                 	postingTable.put(myTermText, myNewTerm); 
-                                 	Boolean myNewBoolean = new Boolean(false);             
-                                 	
-		 					}
-                          
-                 		} //if postinTable.containsKey
-                     	else { // si la table de posting ne contient pas le terme, on l'insere!
-                                                                                                     
-                                short un=1;
-                                TermFrequency myTermFrequency = new TermFrequency(count_id_doc,un );
-                       
-                                TreeMap freq = new TreeMap();
-                                freq.put(count_id_doc, myTermFrequency);
-                                Term myTerm = new Term(count_id_term, mot, freq);     
-                                count_id_term++;
-                                postingTable.put(myTermText, myTerm);
-                                
-                               
-                            
-                     } //else  
+           Term myTerm=(Term) postingTable.get(myTermText); //on récupère les infos qu'on a jusqu'ici
+           postingTable.remove(myTermText);
+           TreeMap freq = new TreeMap();
+           freq = myTerm.frequency; // on recupère les occurences dans les autre documents
+           if (freq.containsKey(count_id_doc)) { // si le terme a déjà été trouvé pour le document
+		       TermFrequency myTermFrequency = (TermFrequency) freq.get(count_id_doc);
+		       freq.remove(count_id_doc);
+		        myTermFrequency.frequency++;
+		       freq.put(count_id_doc, myTermFrequency);
+		       Term myNewTerm = new Term(myTerm.term_id, myTerm.text, freq);
+		       postingTable.put(myTermText, myNewTerm);       
+           }      
+             
+           else { // si le terme est trouve dans un nouvel docuemnt
+    		short un =1;
+        	TermFrequency myTermFrequency = new TermFrequency(count_id_doc,un);   
+         	freq.put(count_id_doc, myTermFrequency);
+        	                                 
+         	Term myNewTerm = new Term(myTerm.term_id, myTerm.text, freq); 
+         	postingTable.put(myTermText, myNewTerm); 
+         	Boolean myNewBoolean = new Boolean(false);             
+                 	
+           }
+          
+ 		} //if postinTable.containsKey
+     	else { // si la table de posting ne contient pas le terme, on l'insere!                                                                     
+            short un=1;
+            TermFrequency myTermFrequency = new TermFrequency(count_id_doc,un );
+   
+            TreeMap freq = new TreeMap();
+            freq.put(count_id_doc, myTermFrequency);
+            Term myTerm = new Term(count_id_term, mot, freq);     
+            count_id_term++;
+            postingTable.put(myTermText, myTerm);  
+     } //else  
 
 	}	// if
 
@@ -265,37 +253,26 @@ for (int j=0;j<mots.length; j++) {
 
 }
 
-
-
-
-  
   /** Prints the documentVector */
    public final void PrintDocumentTable() {
           
       for (Enumeration e=documentVector.elements(); e.hasMoreElements(); ) {
-                DocumentAIndexer tempDocument=new DocumentAIndexer();
-                tempDocument= (DocumentAIndexer) e.nextElement();
-                tempDocument.PrintDocument();
-           }    
+	        DocumentAIndexer tempDocument=new DocumentAIndexer();
+	        tempDocument= (DocumentAIndexer) e.nextElement();
+	        tempDocument.PrintDocument();
+	   }    
           
           
   } // PrintDocumentTable()
-  
-  
  
-  
-  
-  
-
-   
    /** Prints the postingTable*/
    public final void PrintPostingTable() {
           
     for (Enumeration e=postingTable.elements(); e.hasMoreElements(); ) {
-                Term tempTerm=new Term();
-                tempTerm= (Term) e.nextElement();
-                tempTerm.PrintTerm();
-           }         
+            Term tempTerm=new Term();
+            tempTerm= (Term) e.nextElement();
+            tempTerm.PrintTerm();
+       }         
    /* for (Enumeration e=postingTable.keys(); e.hasMoreElements(); ) {
                 TextObject tempTerm= (TextObject) e.nextElement();
                 System.out.println(tempTerm.value + "\t"+ tempTerm.hashCode());
