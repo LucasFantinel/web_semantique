@@ -13,7 +13,7 @@ public final class TermFrequency {
   /** id du document*/
   public int doc_id;
   /** fr�quence dans le document*/
-  public short frequency;
+  public float frequency;
 
 
 /** Defaults Constructor */
@@ -25,7 +25,7 @@ public final class TermFrequency {
   * @param elt_id l'id du noeud
   * @param frequency fr�quence du terme dans le noeud
   **/
-  public TermFrequency(int doc_id, short  frequency) {
+  public TermFrequency(int doc_id, float frequency) {
   
   this.doc_id=doc_id;
   this.frequency =frequency;

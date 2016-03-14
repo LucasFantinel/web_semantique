@@ -10,7 +10,7 @@ public class TermQ {
 	  /** texte du terme*/
 	  public String text;
 	  /** poids du terme dans la requête*/
-	 public short weigth;
+	 public float weigth;
 
 	 /** Default constructor*/
 	 public TermQ() {
@@ -30,7 +30,7 @@ public class TermQ {
 	  * @param weigth poid du terme dans la requête
 	  */
 	 
-	 public TermQ(String text,  short weigth) {
+	 public TermQ(String text,  float weigth) {
 	  this.text =text;
 	  this.weigth = weigth;
 
