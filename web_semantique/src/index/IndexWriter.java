@@ -3,11 +3,7 @@ package index;
 
 import java.util.Vector;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.TreeMap;
 import java.io.File;
@@ -31,7 +27,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.w3c.dom.Attr;
+import org.tartarus.snowball.ext.frenchStemmer;
 
 import utils.FileList;
 import store.BaseWriter;
@@ -49,19 +45,19 @@ public final class IndexWriter {
   /** Vecteur contenant des objets Document
   * @see DocumentAIndexer
   */
-  public Vector documentVector;
+  public Vector<DocumentAIndexer> documentVector;
   
 
   /** Vecteur contenant des objets Noeud
   * @see NodeAIndexer
   */
-  public Vector pathTable;
+  public Vector<?> pathTable;
   
   
   /** Hashtable contenant des objets Term 
   * @see Term
   */
-  public Hashtable postingTable;
+  public Hashtable<TextObject, Term> postingTable;
 
   
 // compteur pour l'identifiant du terme  
@@ -76,7 +72,7 @@ protected int term_count;
 protected BaseWriter maBase;
 
 // liste des fichiers a indexer
-protected Vector fileList;
+protected Vector<?> fileList;
 
   
 // mots vides du français
@@ -84,7 +80,7 @@ public static final String[] STOP_WORDS = {"a","à","afin","ai","aie","aient","a
 	"vers","veut","veux","vont","voulez","voulu","vous"};
 
 
-Hashtable Stoptable;
+Hashtable<String, String> Stoptable;
 
 /**
 * COnstructeur. Met les compteurs a zero et initialise les structures des stockage, instancie le parseur.
@@ -95,9 +91,9 @@ IOException{
 fileList = FileList.list(direc);
 maBase= base;
 
-documentVector=new Vector();
-pathTable = new Vector();
-postingTable = new Hashtable();
+documentVector=new Vector<DocumentAIndexer>();
+pathTable = new Vector<Object>();
+postingTable = new Hashtable<TextObject, Term>();
 
 count_id_doc=0;
 count_id_term=0;
@@ -198,7 +194,7 @@ for (int i=0; i<STOP_WORDS.length; i++)
 // on insere les donnees sur les documents dans la base
 	try{
 	//PrintDocumentTable();
-	maBase.insertDocument(documentVector);
+	BaseWriter.insertDocument(documentVector);
 	}
 	catch (SQLException sqle) {
 		System.out.println("Erreur insertion document et noeuds "+sqle.getMessage());
@@ -208,7 +204,7 @@ for (int i=0; i<STOP_WORDS.length; i++)
 	// on insere les termes dans la base
 try{
 	PrintPostingTable();
-	maBase.insertPosting(postingTable);	
+	BaseWriter.insertPosting(postingTable);	
 }
 catch (SQLException sqle2) {
 	System.out.println("Erreur insertion termes "+sqle2.getMessage());
@@ -221,7 +217,7 @@ catch (SQLException sqle2) {
 */
 public final void constructTerme (String texte) {
 
-Hashtable new_document= new Hashtable();
+Hashtable<TextObject, Term> new_document= new Hashtable<TextObject, Term>();
 // il faut traiter tout ce texte...
 				
 // on passe en minuscules
@@ -253,7 +249,13 @@ texte=texte.replace('©',' ');
 String[] mots=texte.split(" ");
 				
 for (int j=0;j<mots.length; j++) {
-	String mot=mots[j];		// on pourrair utiliser Porter ou la troncature ...!		
+	String mot=mots[j];		// on pourrair utiliser Porter ou la troncature ...!
+	frenchStemmer stemmer = new frenchStemmer();
+	stemmer.setCurrent(mot);
+	if (stemmer.stem()){
+//	    System.out.println(mot+"aprés lemmatiseur = "+stemmer.getCurrent());
+	    mot=stemmer.getCurrent();
+	}
 	// on verifie que le mot n'est pas un mot vide ou un mot qui contient un @ ou un %
 	if (Stoptable.get(mot)==null) {
 		TextObject myTermText = new TextObject(mot);
@@ -262,7 +264,7 @@ for (int j=0;j<mots.length; j++) {
            Term myTerm=(Term) postingTable.get(myTermText); //on récupère les infos qu'on a jusqu'ici
            //postingTable.remove(myTermText);
            new_document.remove(myTermText);
-           TreeMap freq = new TreeMap();
+           TreeMap<Integer, TermFrequency> freq = new TreeMap<Integer, TermFrequency>();
            freq = myTerm.frequency; // on recupère les occurences dans les autre documents
            if (freq.containsKey(count_id_doc)) { // si le terme a déjà été trouvé pour le document
 		       TermFrequency myTermFrequency = (TermFrequency) freq.get(count_id_doc);
@@ -291,7 +293,7 @@ for (int j=0;j<mots.length; j++) {
             short un=1;
             TermFrequency myTermFrequency = new TermFrequency(count_id_doc,un );
    
-            TreeMap freq = new TreeMap();
+            TreeMap<Integer, TermFrequency> freq = new TreeMap<Integer, TermFrequency>();
             freq.put(count_id_doc, myTermFrequency);
             Term myTerm = new Term(count_id_term, mot, freq);     
             count_id_term++;
@@ -306,7 +308,7 @@ for (int j=0;j<mots.length; j++) {
 	while(enumeration.hasMoreElements()){
 		TextObject key = enumeration.nextElement();
 		Term term = (Term) new_document.get(key);
-		TreeMap frequency = term.frequency;
+		TreeMap<Integer, TermFrequency> frequency = term.frequency;
 		TermFrequency termFrequency = (TermFrequency) frequency.get(count_id_doc);
 		float weight = termFrequency.frequency;
 		float tf = weight/count_id_term;
@@ -322,7 +324,7 @@ for (int j=0;j<mots.length; j++) {
   /** Prints the documentVector */
    public final void PrintDocumentTable() {
           
-      for (Enumeration e=documentVector.elements(); e.hasMoreElements(); ) {
+      for (Enumeration<DocumentAIndexer> e=documentVector.elements(); e.hasMoreElements(); ) {
 	        DocumentAIndexer tempDocument=new DocumentAIndexer();
 	        tempDocument= (DocumentAIndexer) e.nextElement();
 	        tempDocument.PrintDocument();
@@ -334,7 +336,7 @@ for (int j=0;j<mots.length; j++) {
    /** Prints the postingTable*/
    public final void PrintPostingTable() {
           
-    for (Enumeration e=postingTable.elements(); e.hasMoreElements(); ) {
+    for (Enumeration<Term> e=postingTable.elements(); e.hasMoreElements(); ) {
             Term tempTerm=new Term();
             tempTerm= (Term) e.nextElement();
             tempTerm.PrintTerm();
