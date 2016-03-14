@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.TreeMap;
 import java.util.Vector;
+
+import org.tartarus.snowball.ext.frenchStemmer;
+
 import java.util.Iterator;
 import java.io.*;
 
@@ -20,8 +23,8 @@ import utils.Similarity;
 final public class TermQuery {
   
   // vecteur contenant les termes de la requetes (objets Term)
-  private Vector terms; 
- 
+  private Vector<TermQ> terms; 
+  private String term_lematiseur;
 
 
   
@@ -30,21 +33,27 @@ final public class TermQuery {
 	*/
    public TermQuery(String query){
    
-   terms=new Vector();
+   terms=new Vector<TermQ>();
    System.out.println("La requete est:"+query);
    String[] termstable = query.split(" ");
    //System.out.println(termstable.length);
    // on pourrait lemmatiser mais on ne le fait pas!
    for (int i=0;i<termstable.length;i++) {
-	   String[] termpoid = termstable[i].split(":");
-	   TermQ monTerme = null;
-	   Short un = 1;
-	   if (termpoid.length <2) monTerme = new TermQ (termpoid[0].toLowerCase(),un);
-	   else monTerme = new TermQ (termpoid[0].toLowerCase(),Short.parseShort(termpoid[1]));
-	   terms.add(monTerme);
+	   frenchStemmer stemmer = new frenchStemmer();
+		stemmer.setCurrent(termstable[i]);
+		if (stemmer.stem()){
+//		    System.out.println(termstable[i]+" aprés lemmatiseur = "+stemmer.getCurrent());
+		    term_lematiseur=stemmer.getCurrent();
+		    System.out.println("après le if : "+term_lematiseur);
+		    String[] termpoid = term_lematiseur.split(":");
+		    TermQ monTerme = null;
+		    Short un = 1;
+		    if (termpoid.length <2) monTerme = new TermQ (termpoid[0].toLowerCase(),un);
+		    else monTerme = new TermQ (termpoid[0].toLowerCase(),Short.parseShort(termpoid[1]));
+		    terms.add(monTerme);
+		}
    }
-   
-  System.out.println("Fin de la requete");
+   System.out.println("Fin de la requete");
    }
 
   
@@ -52,29 +61,24 @@ final public class TermQuery {
   /**
   * Calcule les scores des documents contenant au moins un terme de la requete
   */
-  public TreeMap score(BaseReader reader)
+  public TreeMap<Integer, Float> score(BaseReader reader)
        throws IOException {
  
- TreeMap result = new TreeMap();
+ TreeMap<Integer, Float> result = new TreeMap<Integer, Float>();
 
 // pour chaque terme de la requete   
-for (Enumeration e=terms.elements(); e.hasMoreElements();) {
+for (Enumeration<TermQ> e=terms.elements(); e.hasMoreElements();) {
      
 	 TermQ myTermQuery = null;
 	 Term myTerm = null;
      try { 
-	 myTermQuery = (TermQ) e.nextElement();
-	 System.out.println("recherche dans l'index des doc pour "+myTermQuery.text);
-	 myTerm = reader.readTerm(myTermQuery.text);   // on recupère toutes les infos stockées sur ce terme dans l'index           
-      
-	  if (myTerm!=null) {
-	  
-      
-	  // on pourrait calculer la frequence inverse du terme !!  
-     
-		
-		// pour chaque document contenant le terme, on calcule un score
-		for (Iterator it=myTerm.frequency.keySet().iterator();it.hasNext();) {
+		 myTermQuery = (TermQ) e.nextElement();
+		 System.out.println("recherche dans l'index des doc pour "+myTermQuery.text);
+		 myTerm = reader.readTerm(myTermQuery.text);   // on recupère toutes les infos stockées sur ce terme dans l'index           
+		 if (myTerm!=null) {
+	    	 // on pourrait calculer la frequence inverse du terme !!  
+	    	 // pour chaque document contenant le terme, on calcule un score
+			for (Iterator<?> it=myTerm.frequency.keySet().iterator();it.hasNext();) {
 				TermFrequency mafrequence = (TermFrequency) myTerm.frequency.get(it.next());
 				
 				float weights = Similarity.InnerProd(mafrequence.frequency,	myTermQuery.weigth);
@@ -88,8 +92,7 @@ for (Enumeration e=terms.elements(); e.hasMoreElements();) {
 				result.remove(new Integer(mafrequence.doc_id));
 				result.put(new Integer(mafrequence.doc_id),ancienscore+new Float(weights));
 				}
-		
-		}
+			}
 		}   
       }
     catch (SQLException ex) { 

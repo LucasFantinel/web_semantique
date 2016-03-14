@@ -26,6 +26,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.tartarus.snowball.ext.frenchStemmer;
 
 import utils.FileList;
 import store.BaseWriter;
@@ -204,7 +205,13 @@ texte=texte.replace('©',' ');
 String[] mots=texte.split(" ");
 				
 for (int j=0;j<mots.length; j++) {
-	String mot=mots[j];		// on pourrair utiliser Porter ou la troncature ...!		
+	String mot=mots[j];		// on pourrair utiliser Porter ou la troncature ...!
+	frenchStemmer stemmer = new frenchStemmer();
+	stemmer.setCurrent(mot);
+	if (stemmer.stem()){
+//	    System.out.println(mot+"aprés lemmatiseur = "+stemmer.getCurrent());
+	    mot=stemmer.getCurrent();
+	}
 	// on verifie que le mot n'est pas un mot vide ou un mot qui contient un @ ou un %
 	if (Stoptable.get(mot)==null) {
 		TextObject myTermText = new TextObject(mot);
