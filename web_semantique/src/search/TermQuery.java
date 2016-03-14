@@ -77,7 +77,8 @@ for (Enumeration e=terms.elements(); e.hasMoreElements();) {
 		for (Iterator it=myTerm.frequency.keySet().iterator();it.hasNext();) {
 				TermFrequency mafrequence = (TermFrequency) myTerm.frequency.get(it.next());
 				
-				float weights = Similarity.InnerProd(mafrequence.frequency,	myTermQuery.weigth);
+				//float weights = Similarity.InnerProd(mafrequence.frequency,	myTermQuery.weigth);
+				float weights = mafrequence.frequency;
 				// si ce document a deja un score, on additionne
 				if (!result.containsKey(new Integer(mafrequence.doc_id))) {
 				result.put(new Integer(mafrequence.doc_id), new Float(weights));

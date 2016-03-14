@@ -54,7 +54,7 @@ public final class Similarity {
  /**
  * Computes the Innerproduct for a TERM find in a doc and in a query
  */
-  public static final float InnerProd(float poidDoc, short poidReq) {
+  public static final float InnerProd(float poidDoc, float poidReq) {
   		
 	return (float) (poidDoc*poidReq);
 

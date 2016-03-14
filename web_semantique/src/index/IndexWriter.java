@@ -3,6 +3,11 @@ package index;
 
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.TreeMap;
 import java.io.File;
@@ -172,6 +177,29 @@ for (int i=0; i<STOP_WORDS.length; i++)
 	count_id_doc++;
   }//on a fini de parcourir tous les documents
 
+  // calcul idf
+  Enumeration<TextObject> enumeration = postingTable.keys();
+  while(enumeration.hasMoreElements()){
+	  TextObject key = enumeration.nextElement();
+	  Term term = (Term) postingTable.get(key);
+	  Map<Integer, TermFrequency> frequency = term.frequency;
+	  int nb_occur_document = frequency.size();
+	  double q = fileList.size()/nb_occur_document;
+	  float idf = (float) Math.log(q);
+	  for (Map.Entry<Integer, TermFrequency> entry : frequency.entrySet()) {
+		  float freq = idf * entry.getValue().frequency;
+		  entry.setValue(new TermFrequency(entry.getKey(), freq));
+	  }
+	  Term newTerm = new Term(term.term_id, term.text, (TreeMap<Integer, TermFrequency>) frequency);
+	  postingTable.remove(key);
+	  postingTable.put(key, newTerm);
+	  
+  }
+  
+  
+  
+  
+  
 // on insere les donnees sur les documents dans la base
 	try{
 	//PrintDocumentTable();
