@@ -192,13 +192,8 @@ for (int i=0; i<STOP_WORDS.length; i++)
 	  }
 	  Term newTerm = new Term(term.term_id, term.text, (TreeMap<Integer, TermFrequency>) frequency);
 	  postingTable.remove(key);
-	  postingTable.put(key, newTerm);
-	  
-  }
-  
-  
-  
-  
+	  postingTable.put(key, newTerm);	  
+  } 
   
 // on insere les donnees sur les documents dans la base
 	try{
