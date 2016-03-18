@@ -92,7 +92,7 @@ public class BaseWriter {
 	
 	rs = stmt.execute("create table Termes (term_id int primary key, term varchar(200) NOT NULL );");
 		
-	rs = stmt.execute("create table TermesDoc (term_id int, doc_id int, poids real, PRIMARY KEY(term_id,doc_id));");
+	rs = stmt.execute("create table TermesDoc (term_id int, doc_id int, poids float, PRIMARY KEY(term_id,doc_id));");
     System.out.println("Table Termes creees");
 	
     if (stmt != null) { 
@@ -173,7 +173,6 @@ public static void insertPosting(Hashtable myPostingTable) throws SQLException{
                 boolean rs;
 				//System.out.println("j essaie :"+tempTerm.text);
                 String query = "insert into Termes (term_id,term) values ("+tempTerm.term_id+",\'"+tempTerm.text+"\')";
-                System.out.println(query);
                 try {    stmt.execute(query);
                 }
                 catch (SQLException sqlEx) { System.out.println(query +"Erreur dans l'insertion du Term : "+ sqlEx.getMessage());
@@ -184,6 +183,7 @@ public static void insertPosting(Hashtable myPostingTable) throws SQLException{
                                 TermFrequency tempTermFrequency=new TermFrequency();
                                 tempTermFrequency = (TermFrequency) tempTerm.frequency.get(it.next()); 
                                 String query2 = "insert into TermesDoc (term_id,doc_id,poids) values ("+tempTerm.term_id+","+tempTermFrequency.doc_id+","+tempTermFrequency.frequency+")";
+                                System.out.println(query2);
                                 rs = stmt.execute(query2);      
                 				
                         }  // for it
