@@ -168,7 +168,7 @@ public int findDoc(int node) throws SQLException{
      
 
 	      
-     /** A REVOIRRRR
+     /** A REVOIRRRR => modif pour termesdoc
      * Trouve le nombre de termes d'un identifiant de document donne
      * @param doc_id idenfiant du document dont on veut le nombre de termes
      * @return int nombre de termes pour l'identifiant de document donne
@@ -177,7 +177,7 @@ public int findDoc(int node) throws SQLException{
        Statement stmt = null; 
        ResultSet rs = null;
        stmt = conn.createStatement(); 
-       String query = "select term_nb from Documents where doc_id= "+doc_id;   
+       String query = "select count(*) from termesdoc where doc_id= "+doc_id;   
       int nb=0;
        
        rs = stmt.executeQuery(query);
@@ -219,15 +219,6 @@ public int findDoc(int node) throws SQLException{
        while (rs.next()) { max=rs.getInt(1);}
         return max;     
      } //maxLeaf()
-     
-
-     
-     
-
-     
-    
-  
-
      
      /**
      * Trouve l'objet Term correspondant a un terme en le cherchant dans la table Termes
@@ -282,7 +273,16 @@ public int findDoc(int node) throws SQLException{
      } //readTerm()
     
 
-
+public int getOccur(String term, int doc_id) throws SQLException{
+	int result = 0;
+	Statement stmt = null; 
+    ResultSet rs = null;
+    stmt = conn.createStatement(); 
+    String query = "select td.poids from Termes t, TermesDoc td where td.doc_id="+doc_id+" AND t.term=\'"+term+"\' AND t.term_id=td.term_id;";
+    rs = stmt.executeQuery(query);
+   while (rs.next()) { result=rs.getInt(1);}
+	return result;
+}
      
      
 /**

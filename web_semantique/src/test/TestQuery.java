@@ -12,6 +12,7 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
+import search.TermQ;
 import search.TermQuery;
 import store.BaseReader;
 
@@ -31,7 +32,7 @@ public static void main(String argv[])  {
                            
 			 String monfichier= new String(argv[0]);
 	         System.out.println(monfichier);
-	         String q= "";
+	         String q="";
              
 		
              BufferedReader config = new BufferedReader (new FileReader(monfichier));
@@ -51,6 +52,7 @@ public static void main(String argv[])  {
 			 BaseReader base=new BaseReader(ConnectURL,login,pass);
 			 // recherche de tous les documents pertinents de l'index et on calcule le score de pertinence
              TreeMap results = query.score(base);
+             
 		 
              System.out.println(results.size() +" resultats");
             
@@ -61,11 +63,20 @@ public static void main(String argv[])  {
 			Collections.sort(cles, new CompScore(results));
 		
 			int i=1;
+			double tfidf_total = 0;
 			for (Iterator it=cles.listIterator();it.hasNext();) {
 				// on recupere l'id du document et on va chercher son nom
 				Integer docid = (Integer) it.next();
+				for (Enumeration<TermQ> e=query.terms.elements(); e.hasMoreElements();) {
+					TermQ myTermQuery = (TermQ) e.nextElement();
+			    	double tf = query.tf(base, docid, myTermQuery.text);
+			    	double idf = Math.log((float) 138/results.size());
+			    	double tfidf = tf*idf;
+			    	tfidf_total += tfidf;
+			    	//System.out.println("Frequency " + myTermQuery.text + " : " + tfidf);
+			    }
 				String nom_fichier= base.document(docid).name;
-				out.write(nom_fichier+"\t"+results.get(docid)+"\n");
+				out.write(nom_fichier+"\t"+tfidf_total+"\n");
 					//out.write(node.getTextContent()+"\n\n");			
 			}
 			

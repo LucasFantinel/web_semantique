@@ -23,7 +23,7 @@ import utils.Similarity;
 final public class TermQuery {
   
   // vecteur contenant les termes de la requetes (objets Term)
-  private Vector<TermQ> terms; 
+  public Vector<TermQ> terms; 
   private String term_lematiseur;
 
 
@@ -40,9 +40,9 @@ final public class TermQuery {
    // on pourrait lemmatiser mais on ne le fait pas!
    for (int i=0;i<termstable.length;i++) {
 	   frenchStemmer stemmer = new frenchStemmer();
-		stemmer.setCurrent(termstable[i]);
+		stemmer.setCurrent(termstable[i].toLowerCase());
 		if (stemmer.stem()){
-//		    System.out.println(termstable[i]+" aprés lemmatiseur = "+stemmer.getCurrent());
+//		    System.out.println(termstable[i]+" après lemmatiseur = "+stemmer.getCurrent());
 		    term_lematiseur=stemmer.getCurrent();
 		    System.out.println("après le if : "+term_lematiseur);
 		    String[] termpoid = term_lematiseur.split(":");
@@ -102,20 +102,24 @@ for (Enumeration<TermQ> e=terms.elements(); e.hasMoreElements();) {
     System.out.println("SQLState: " + ex.getSQLState()); 
     System.out.println("VendorError: " + ex.getErrorCode()); 
     }
-    
-    
-    
-  
   }
   
   	//System.out.println(result.size());
     return result;
   
-  
-  
-  
-  
   } //scorer
   
+  public double tf(BaseReader base,int doc_id, String term){
+	double result = 0.0;	  
+	try {
+		int nb_occurences = base.getOccur(term, doc_id);
+		int nb_term_total;
+		nb_term_total = base.getDocTermCount(doc_id);
+		result = (float) nb_occurences/nb_term_total;
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	return result;
+  }
 
 } //termQuery.java

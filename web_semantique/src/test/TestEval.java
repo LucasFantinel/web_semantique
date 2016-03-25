@@ -73,9 +73,9 @@ rang++;
 
 res.close();
 
-System.out.println("P@5: "+p5);
-System.out.println("P@10: "+p10);
-System.out.println("P@25 :"+p25);
+System.out.println("P@5: "+(float)p5/5);
+System.out.println("P@10: "+(float)p10/10);
+System.out.println("P@25 :"+(float)p25/25);
 }
 catch (IOException io) {System.out.println("Erreur lecture fichier");}
 }// main

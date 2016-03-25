@@ -245,11 +245,19 @@ texte=texte.replace('}',' ');
 texte=texte.replace('{',' ');
 texte=texte.replace('&',' ');
 texte=texte.replace('©',' ');
+texte=texte.replace('«', ' ');
+texte=texte.replace('»', ' ');
+texte=texte.replace('”', ' ');
+texte=texte.replace('“', ' ');
+texte=texte.replace('„', ' ');
+texte=texte.replace('_', ' '); 
+
 				
 String[] mots=texte.split(" ");
 				
 for (int j=0;j<mots.length; j++) {
-	String mot=mots[j];		// on pourrair utiliser Porter ou la troncature ...!
+	String mot=mots[j];		// on pourrait utiliser Porter ou la troncature ...!
+	mot = mot.substring(0, mot.length());
 	frenchStemmer stemmer = new frenchStemmer();
 	stemmer.setCurrent(mot);
 	if (stemmer.stem()){
